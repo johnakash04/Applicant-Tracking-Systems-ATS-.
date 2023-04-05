@@ -13,7 +13,7 @@ public class ConnectBot{
     private static String TOKEN;
 
     public ConnectBot() {
-        TOKEN = "MTA5Mjk5OTAwMDkzNzk4ODEyNg.G24ijz.tGRrbTX1D-wDEThDHhhhE2l9q74gs_MWK5Oyvk";
+        TOKEN = "ENTER TOKEN";
         start();
     }
 
