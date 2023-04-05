@@ -3,9 +3,6 @@ import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
 
 
-import javax.security.auth.login.LoginException;
-
-
 public class ConnectBot{
 
     @Getter
@@ -24,10 +21,7 @@ public class ConnectBot{
                     .setActivity(Activity.watching("Direct Messages!"))
                     .addEventListeners(new BotListener())
                     .addEventListeners(new MessageListener())
-                    
                     .build();
-
-
 
             jda.awaitReady();
             System.out.println("Bot has successfully built");
@@ -38,7 +32,5 @@ public class ConnectBot{
 
     }
 
-  
-
-
+ 
 }

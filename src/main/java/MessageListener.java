@@ -29,7 +29,6 @@ public class MessageListener extends ListenerAdapter{
         + "\nLet's get you hired!";
 
 
-
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.isFromType(ChannelType.PRIVATE)) {
@@ -47,10 +46,8 @@ public class MessageListener extends ListenerAdapter{
 
             //HELP COMMAND
             if(command[0].equals("!help")){
-                sendPrivateMessage(event.getMessage().getAuthor(),help );
-
+                sendPrivateMessage(event.getMessage().getAuthor(),help);
             }
-
 
         }
     }
@@ -84,9 +81,7 @@ public class MessageListener extends ListenerAdapter{
                     .flatMap(channel -> channel.sendMessage(content))
                     .queue();
         }
-        catch (Exception e){
-
-        }
+        catch (Exception e){}
 
     }
 
@@ -120,11 +115,9 @@ public class MessageListener extends ListenerAdapter{
             }
 
             /* CV KEYWORD & CATEGORY SCAN */
-
-     
+    
 
         } catch (IOException e) {}
-
 
             
         return "\nResume Keyword Performance: " + new DecimalFormat("#.00%").format(score/denom)  + 
