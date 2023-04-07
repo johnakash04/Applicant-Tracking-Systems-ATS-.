@@ -39,7 +39,6 @@ public class MessageListener extends ListenerAdapter{
         + "\nReceive instant feedback on your resume's performance and stand out in today's competitive job market."
         + "\nLet's get you hired!";
 
-
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         try {
@@ -86,7 +85,6 @@ public class MessageListener extends ListenerAdapter{
                 .queue();
     }
 
-  
     public String analyzeResume(File f) throws Exception{
 
         double actionVerbPerf = 0;
@@ -139,4 +137,5 @@ public class MessageListener extends ListenerAdapter{
                "\n**Identified Category: " + "NaN" +
                "\n**Word Count**: " + wordCount;
     }
+
 }
