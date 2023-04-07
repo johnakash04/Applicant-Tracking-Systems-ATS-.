@@ -1,5 +1,5 @@
 # A Discord Chatbot Resume Scanner 
-A Discord chatbot that allows users to verify how well their resumes will perform on online resumer scanners, also known as Applicant Tracking Systems (ATS).
+A Discord chatbot that allows users to verify how well their resumes will perform on online resume scanners, also known as Applicant Tracking Systems (ATS).
 
 The chatbot is built using Java 20 and utilizes the JDA (Java Discord API) library to communicate with Discord. 
 
