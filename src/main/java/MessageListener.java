@@ -46,120 +46,101 @@ public class MessageListener extends ListenerAdapter{
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        if (event.isFromType(ChannelType.PRIVATE)) {
+        try {
+            if (event.isFromType(ChannelType.PRIVATE)) {
 
-            String[] command = event.getMessage().getContentRaw().split(" ");
-          
-            //SCAN COMMAND
-            if(command[0].equals("!scan") && !event.getMessage().getAttachments().isEmpty() ){
-                downloadAttachment(event.getMessage());
+                String[] command = event.getMessage().getContentRaw().split(" ");
+            
+                //SCAN COMMAND
+                if(command[0].equals("!scan") && !event.getMessage().getAttachments().isEmpty() ){
+                    downloadAttachment(event.getMessage());
+                }
+
+                //HELP COMMAND
+                if(command[0].equals("!help")){
+                    sendPrivateMessage(event.getMessage().getAuthor(),help);
+                }
+
             }
-
-            //HELP COMMAND
-            if(command[0].equals("!help")){
-                sendPrivateMessage(event.getMessage().getAuthor(),help);
-            }
-
-        }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }        
     }
 
-    public void downloadAttachment(Message msg){
-            try{
-                Message.Attachment attachment = msg.getAttachments().get(0);
-                if(attachment!= null) {
-
-                    if(attachment.getFileExtension().equals("docx")){
-                        File f;
-                        String fName = attachment.getFileName();
-                        attachment.getProxy().downloadToFile(f = new File(fName)).thenAccept(file -> {
-                            //System.out.println("Wrote attachment to file " + file.getAbsolutePath());
-                        });
-                        
-                        sendPrivateMessage(msg.getAuthor(),"Analyzed " + attachment.getFileName() +analyzeResume(f));
-                    }
-                    else{
-                        sendPrivateMessage(msg.getAuthor(),"Error ." + attachment.getFileExtension() + " is not supported. \nPlease provide a .docx document.");
-
-                    }
+    public void downloadAttachment(Message msg) throws Exception{
+        Message.Attachment attachment = msg.getAttachments().get(0);
+            if(attachment!= null) {
+                if(attachment.getFileExtension().equals("docx")){
+                    File f;
+                    String fName = attachment.getFileName();
+                    attachment.getProxy().downloadToFile(f = new File(fName)).thenAccept(file -> {
+                    }); 
+                    sendPrivateMessage(msg.getAuthor(),"Analyzed " + attachment.getFileName() +analyzeResume(f));
+                }
+                else{
+                    sendPrivateMessage(msg.getAuthor(),"Error ." + attachment.getFileExtension() + " is not supported. \nPlease provide a .docx document.");
                 }
             }
-            catch (IndexOutOfBoundsException e){}
+
     }
 
-    public void sendPrivateMessage(User user, String content){
-        try {
-            user.openPrivateChannel()
-                    .flatMap(channel -> channel.sendMessage(content))
-                    .queue();
-        }
-        catch (Exception e){}
-
+    public void sendPrivateMessage(User user, String content) throws Exception{
+        user.openPrivateChannel()
+                .flatMap(channel -> channel.sendMessage(content))
+                .queue();
     }
 
   
-    public String analyzeResume(File f){
+    public String analyzeResume(File f) throws Exception{
 
         double actionVerbPerf = 0;
         double quantativePerf = 0;
         int wordCount =0;
 
-        try {
+        /** LOADING  ACTION VERBS */
+        BufferedReader br = new BufferedReader(new FileReader("src/main/resources/actionVerbs.txt"));
+        String actionLine = br.readLine().toLowerCase();
 
-            /** LOADING  ACTION VERBS */
-            BufferedReader br = new BufferedReader(new FileReader("src/main/resources/actionVerbs.txt"));
-            String actionLine = br.readLine().toLowerCase();
-
-            List<String> actionVerbs = new ArrayList<>();
-            String[] tmp = actionLine.split(",");
-            for(String s : tmp){
-                actionVerbs.add(s);
-            }
-           
-
-
-            /** LOADING RESUME */
-
-            InputStream fStream = new FileInputStream(f);
-            XWPFDocument doc = new XWPFDocument(fStream);
-            POITextExtractor extractor = new XWPFWordExtractor(doc);
-
-            String r = extractor.getText().toLowerCase();
-            r = r.replaceAll("\\\t+", " ");
-            r = r.replaceAll(",", "");
-            
-        
-            String[] rSplit = r.split(" ");
-            List<String> resume = Arrays.asList(rSplit);
-            wordCount = resume.size();
-            
-            /* CLOSING STREAMS */            
-            extractor.close();
-            br.close();
-
-            /* Action Verb Performance */
-            actionVerbs.retainAll(resume);  
-            actionVerbPerf = actionVerbs.size();
-          
-            /* QUANTATIVE PERF */
-            Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-            
-                        for(String str : resume){
-                if( pattern.matcher(str).matches()){
-                    quantativePerf++;
-                }
-            }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        List<String> actionVerbs = new ArrayList<>();
+        String[] tmp = actionLine.split(",");
+        for(String s : tmp){
+            actionVerbs.add(s);
         }
         
+        /** LOADING RESUME */
+        InputStream fStream = new FileInputStream(f);
+        XWPFDocument doc = new XWPFDocument(fStream);
+        POITextExtractor extractor = new XWPFWordExtractor(doc);
 
+        String r = extractor.getText().toLowerCase();
+        r = r.replaceAll("\\\t+", " ");
+        r = r.replaceAll(",", "");
+        
+        String[] rSplit = r.split(" ");
+        List<String> resume = Arrays.asList(rSplit);
+        wordCount = resume.size();
+        
+        /* CLOSING STREAMS */            
+        extractor.close();
+        br.close();
+
+        /* Action Verb Performance */
+        actionVerbs.retainAll(resume);  
+        actionVerbPerf = actionVerbs.size();
+        
+        /* QUANTATIVE PERF */
+        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+        
+        for(String str : resume){
+            if( pattern.matcher(str).matches()){
+                quantativePerf++;
+            }
+        }
+        
         return "\n-----" +
                "\n**Action Performance**: " + new DecimalFormat("#.0%").format(actionVerbPerf/7)  + 
                "\n**Quantative Performance**: " + new DecimalFormat("#.0%").format(quantativePerf/7)  +
                "\n**Identified Category: " + "NaN" +
                "\n**Word Count**: " + wordCount;
-
     }
 }
