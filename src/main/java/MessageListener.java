@@ -101,7 +101,6 @@ public class MessageListener extends ListenerAdapter{
 
         double actionVerbPerf = 0;
         double quantativePerf = 0;
-        double denom = 30;
         int wordCount =0;
 
         try {
