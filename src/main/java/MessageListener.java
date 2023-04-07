@@ -1,18 +1,23 @@
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import org.apache.poi.extractor.POITextExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
@@ -20,11 +25,21 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 public class MessageListener extends ListenerAdapter{
 
-    String help = "Welcome to your personal resume advisor bot, ResuScan!"
+    String help = "**Welcome to your personal resume advisor bot, ResuScan!**"
         + "\n--------------------------------"
-        + "\nBoost your chances of getting hired with just one command:"
-        + "\n!scan [DM job posting] [ATTACHMENT document.docx]"
+        + "\n**Boost your chances of getting hired with just one __command__**:"
+        + "\n`!scan [ATTACHMENT document.docx]`"
         + "\n--------------------------------"
+        + "\n**Result Analysis** :satellite_orbital:"
+        + "\n--------------------------------"
+        + "\n**Action Performance**: Measure the candidates performance by targetting action verbs. \n\t\t\tGreat: 70% +\n\t\t\tOk: 50% + \n\t\t\tBad: Less "
+        + "\n--------------------------------"
+        + "\n**Quantitive Performance**: Measure the candidates performance by targetting their quantitive acheivments. \n\t\t\tGreat: 70% + \n\t\t\tOk: 50% +  \n\t\t\tBad: Less"
+        + "\n--------------------------------"
+        + "\n**Identified Category**: Scanner determined category: Scan a variety of feild keywords to identify the cv's category. Wrong categories likely lack proper vocabulary"
+        + "\n--------------------------------"
+        + "\n**Styling**: Measure the resumes styling by comparing the scanner word count and the accurate result. Best formats have high accuracy."    
+        + "\n--------------------------------"  
         + "\nReceive instant feedback on your resume's performance and stand out in today's competitive job market."
         + "\nLet's get you hired!";
 
@@ -33,15 +48,11 @@ public class MessageListener extends ListenerAdapter{
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.isFromType(ChannelType.PRIVATE)) {
 
-            //System.out.printf("[PM] %s: %s\n", event.getAuthor().getName(),event.getMessage().getContentDisplay());
-
             String[] command = event.getMessage().getContentRaw().split(" ");
-            System.out.println("command: " + command[0]);
-
+          
             //SCAN COMMAND
             if(command[0].equals("!scan") && !event.getMessage().getAttachments().isEmpty() ){
                 downloadAttachment(event.getMessage());
-                //analyse document alongside keywords
             }
 
             //HELP COMMAND
@@ -64,7 +75,7 @@ public class MessageListener extends ListenerAdapter{
                             //System.out.println("Wrote attachment to file " + file.getAbsolutePath());
                         });
                         
-                        sendPrivateMessage(msg.getAuthor(),"Analyzed " + attachment.getFileName() +analyzeDocument(f,msg.getContentRaw()));
+                        sendPrivateMessage(msg.getAuthor(),"Analyzed " + attachment.getFileName() +analyzeResume(f));
                     }
                     else{
                         sendPrivateMessage(msg.getAuthor(),"Error ." + attachment.getFileExtension() + " is not supported. \nPlease provide a .docx document.");
@@ -85,44 +96,71 @@ public class MessageListener extends ListenerAdapter{
 
     }
 
-    public String analyzeDocument(File f , String content){
+  
+    public String analyzeResume(File f){
 
-        String[] str = content.split(" ");
-        List<String> keywords = new ArrayList<String>();
-        keywords = Arrays.asList(str);
-
-        double score = 0;
-        double denom = 0;
-        String category = "null";
-       
+        double actionVerbPerf = 0;
+        double quantativePerf = 0;
+        double denom = 30;
+        int wordCount =0;
 
         try {
+
+            /** LOADING  ACTION VERBS */
+            BufferedReader br = new BufferedReader(new FileReader("src/main/resources/actionVerbs.txt"));
+            String actionLine = br.readLine().toLowerCase();
+
+            List<String> actionVerbs = new ArrayList<>();
+            String[] tmp = actionLine.split(",");
+            for(String s : tmp){
+                actionVerbs.add(s);
+            }
+           
+
+
+            /** LOADING RESUME */
+
             InputStream fStream = new FileInputStream(f);
             XWPFDocument doc = new XWPFDocument(fStream);
             POITextExtractor extractor = new XWPFWordExtractor(doc);
-            String resume = extractor.getText();
-            extractor.close();
 
-            String[] resumeSplit = resume.split(" ");
-            denom = resumeSplit.length;
-
+            String r = extractor.getText().toLowerCase();
+            r = r.replaceAll("\\\t+", " ");
+            r = r.replaceAll(",", "");
             
-            /* JOB DESC & CV KEYWORD SCAN */
-            for(int i = 0; i < keywords.size(); i++){
-                if(resume.contains(keywords.get(i))){
-                    score++;
+        
+            String[] rSplit = r.split(" ");
+            List<String> resume = Arrays.asList(rSplit);
+            wordCount = resume.size();
+            
+            /* CLOSING STREAMS */            
+            extractor.close();
+            br.close();
+
+            /* Action Verb Performance */
+            actionVerbs.retainAll(resume);  
+            actionVerbPerf = actionVerbs.size();
+          
+            /* QUANTATIVE PERF */
+            Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+            
+                        for(String str : resume){
+                if( pattern.matcher(str).matches()){
+                    quantativePerf++;
                 }
             }
 
-            /* CV KEYWORD & CATEGORY SCAN */
-    
 
-        } catch (IOException e) {}
-
-            
-        return "\nResume Keyword Performance: " + new DecimalFormat("#.00%").format(score/denom)  + 
-                "\nIdentified Category: " + category;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
-    }
 
+        return "\n-----" +
+               "\n**Action Performance**: " + new DecimalFormat("#.0%").format(actionVerbPerf/7)  + 
+               "\n**Quantative Performance**: " + new DecimalFormat("#.0%").format(quantativePerf/7)  +
+               "\n**Identified Category: " + "NaN" +
+               "\n**Word Count**: " + wordCount;
+
+    }
 }
