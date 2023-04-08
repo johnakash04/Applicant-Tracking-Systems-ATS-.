@@ -14,7 +14,7 @@ To use the chatbot, you will need to have Java 20 and Maven installed on your sy
 
 `mvn clean install`
 
-3. Find TOKEN and string with your token string.
+3. Find TOKEN and replace with your token string.
 
 The bot should now be running and ready to use on you're personal server.
 
