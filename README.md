@@ -12,11 +12,9 @@ To use the chatbot, you will need to have Java 20 and Maven installed on your sy
 
 2. Navigate to the cloned directory and install the required packages by running:
 
-`mvn clean install`
-
 3. Find TOKEN and replace with your token string.
 
-The bot should now be running and ready to use on you're personal server.
+4. Execute `run.bat` on a machine that contains `Java 17`. The bot should now be running and ready to use on you're personal server.
 
 ## Usage
 To use the bot, invite it to your Discord server and type !help to see a list of available commands. The main command to check your resume is !scan, which accepts a resume file attachment. The bot will then analyze the resume and provide a report indicating how well it will perform on an ATS.
