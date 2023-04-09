@@ -68,9 +68,14 @@ public class MessageListener extends ListenerAdapter{
                 if(attachment.getFileExtension().equals("docx")){
                     File f;
                     String fName = attachment.getFileName();
-                    attachment.getProxy().downloadToFile(f = new File(fName)).thenAccept(file -> {
+                    attachment.getProxy().download().thenAccept(file -> {
+                        try {
+                            sendPrivateMessage(msg.getAuthor(),"Analyzed " + attachment.getFileName() +analyzeResume(file));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }); 
-                    sendPrivateMessage(msg.getAuthor(),"Analyzed " + attachment.getFileName() +analyzeResume(f));
+                    
                 }
                 else{
                     sendPrivateMessage(msg.getAuthor(),"Error ." + attachment.getFileExtension() + " is not supported. \nPlease provide a .docx document.");
@@ -85,14 +90,14 @@ public class MessageListener extends ListenerAdapter{
                 .queue();
     }
 
-    public String analyzeResume(File f) throws Exception{
+    public String analyzeResume(InputStream file) throws Exception{
 
         double actionVerbPerf = 0;
         double quantativePerf = 0;
         int wordCount =0;
 
         /** LOADING  ACTION VERBS */
-        BufferedReader br = new BufferedReader(new FileReader("src/main/resources/actionVerbs.txt"));
+        BufferedReader br = new BufferedReader(new FileReader("actionVerbs.txt"));
         String actionLine = br.readLine().toLowerCase();
 
         List<String> actionVerbs = new ArrayList<>();
@@ -102,8 +107,7 @@ public class MessageListener extends ListenerAdapter{
         }
         
         /** LOADING RESUME */
-        InputStream fStream = new FileInputStream(f);
-        XWPFDocument doc = new XWPFDocument(fStream);
+        XWPFDocument doc = new XWPFDocument(file);
         POITextExtractor extractor = new XWPFWordExtractor(doc);
 
         String r = extractor.getText().toLowerCase();
@@ -134,7 +138,7 @@ public class MessageListener extends ListenerAdapter{
         return "\n-----" +
                "\n**Action Performance**: " + new DecimalFormat("#.0%").format(actionVerbPerf/7)  + 
                "\n**Quantative Performance**: " + new DecimalFormat("#.0%").format(quantativePerf/7)  +
-               "\n**Identified Category: " + "NaN" +
+               "\n**Identified Category**: " + "NaN" +
                "\n**Word Count**: " + wordCount;
     }
 

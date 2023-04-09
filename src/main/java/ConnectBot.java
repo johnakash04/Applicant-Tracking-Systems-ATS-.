@@ -19,7 +19,6 @@ public class ConnectBot{
         try {
             jda = JDABuilder.createDefault(TOKEN)
                     .setActivity(Activity.watching("Direct Messages!"))
-                    .addEventListeners(new BotListener())
                     .addEventListeners(new MessageListener())
                     .build();
 
