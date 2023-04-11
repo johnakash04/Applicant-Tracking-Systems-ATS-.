@@ -17,7 +17,7 @@ To use the chatbot, you will need to have Java 20 and Maven installed on your sy
 ## Usage
 To use the bot, invite it to your Discord server and type !help to see a list of available commands. The main command to check your resume is !scan, which accepts a resume file attachment. The bot will then analyze the resume and provide a report indicating how well it will perform on an ATS.
 
-##Contributing
+## Contributing
 Contributions to this project are welcome. If you would like to contribute, please fork the repository and submit a pull request with your changes. Please ensure that your code adheres to the Google Java Style Guide and includes tests where applicable.
 
 ## License
